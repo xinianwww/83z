@@ -94,7 +94,7 @@
 
         <!-- 结算界面 -->
         <div id="result-screen" class="overlay hidden">
-            <h2 id="result-rank" class="text-7xl font-black mb-2 italic">A</h2>
+            <h2 id="result-rank" class="text-7xl font-black mb-2 italic">S</h2>
             <p id="result-comment" class="text-lg text-gray-700 mb-6 px-6 font-bold leading-relaxed"></p>
             <p class="text-sm text-gray-400 mb-1">推开距离</p>
             <p id="result-dist" class="text-4xl font-bold text-blue-600 mb-8">0 cm</p>
@@ -140,11 +140,11 @@
     let velocity = 0;
     let lastTime = 0;
 
-    // --- 难度下调后的黄金参数 (修复了重复声明错误) ---
-    const FRICTION = 0.945;       // 摩擦力：滑行更顺畅
-    const CLICK_IMPULSE = 55;     // 点击冲力：每下推得更远
-    const ELASTIC_FORCE = 0.003;  // 弹性拉力：更小，容易拉开
-    const BASE_PULL = 5;          // 基础回缩力
+    // 物理参数 - 保持低难度
+    const FRICTION = 0.945;       
+    const CLICK_IMPULSE = 60;     
+    const ELASTIC_FORCE = 0.003;  
+    const BASE_PULL = 5;          
 
     function resize() {
         dpr = window.devicePixelRatio || 1;
@@ -196,7 +196,6 @@
         timeLeft -= dt;
         if (timeLeft <= 0) { timeLeft = 0; endGame(); }
 
-        // 物理逻辑
         const pull = (distance * distance * ELASTIC_FORCE) + (distance > 2 ? BASE_PULL : 0);
         velocity -= pull;
         velocity *= FRICTION;
@@ -226,13 +225,11 @@
                 drawW = drawH / ratio;
             }
 
-            const overlapAdjustment = 5; // 增加 5px 的重叠，让两人完全粘住
+            const overlapAdjustment = 5; // 视觉贴紧补偿
             let xPos;
             if (type === 'lt') {
-                // 向右偏移 adjustment
                 xPos = (width / 2) - offset - drawW + overlapAdjustment;
             } else {
-                // 向左偏移 adjustment
                 xPos = (width / 2) + offset - overlapAdjustment;
             }
             const yPos = height - drawH; 
@@ -242,7 +239,6 @@
 
     function render() {
         ctx.clearRect(0, 0, width, height);
-        // 背景
         if (imgs.bg && imgs.bg.complete) {
             const imgAspect = imgs.bg.width / imgs.bg.height;
             const canvasAspect = width / height;
@@ -269,23 +265,19 @@
         let comment = '';
         let color = '#64748b';
 
-        // 4个等级划分
-        if (finalDist > 180) {
-            rank = 'A';
-            comment = "这次仁川大战看来superjunior是真的要解散了";
-            color = "#ef4444"; 
-        } else if (finalDist > 80) {
-            rank = 'B';
-            comment = "距离产生美，下台了再打一架吧。";
-            color = "#3b82f6"; 
+        // 严格按照用户要求的 3 个等级划分
+        if (finalDist > 30) {
+            rank = 'S';
+            comment = "这是仁川历史性的一幕！这次看来superjunior是真的要解散了";
+            color = "#ef4444"; // 红色
         } else if (finalDist > 15) {
-            rank = 'C';
-            comment = "你就这么不想和利特分开吗？";
-            color = "#10b981"; 
+            rank = 'A';
+            comment = "恭喜你，终于找回了职业爱豆的冷静。距离产生美，下台了再打一架吧。";
+            color = "#3b82f6"; // 蓝色
         } else {
             rank = 'F';
             comment = "说实话，你就是想贴着利特吧";
-            color = "#64748b"; 
+            color = "#10b981"; // 绿色
         }
         
         const rankEl = document.getElementById('result-rank');
