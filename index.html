@@ -140,11 +140,11 @@
     let velocity = 0;
     let lastTime = 0;
 
-    // 物理参数 - 保持低难度
-    const FRICTION = 0.945;       
-    const CLICK_IMPULSE = 60;     
-    const ELASTIC_FORCE = 0.003;  
-    const BASE_PULL = 5;          
+    // 物理参数 - 增加了回弹力度和摩擦力阻尼
+    const FRICTION = 0.92;        // 降低摩擦系数，使速度衰减更快
+    const CLICK_IMPULSE = 58;     // 稍微调整点击爆发力
+    const ELASTIC_FORCE = 0.006;  // 显著增加弹性系数，拉力随距离平方剧增
+    const BASE_PULL = 10;         // 增加基础回弹拉力，产生更强的“吸附感”
 
     function resize() {
         dpr = window.devicePixelRatio || 1;
@@ -265,19 +265,23 @@
         let comment = '';
         let color = '#64748b';
 
-        // 严格按照用户要求的 3 个等级划分
+        // 评价逻辑：细化了 0-15cm 之间的 F 等级评价
         if (finalDist > 30) {
             rank = 'S';
             comment = "这是仁川历史性的一幕！这次看来superjunior是真的要解散了";
-            color = "#ef4444"; // 红色
+            color = "#ef4444"; 
         } else if (finalDist > 15) {
             rank = 'A';
-            comment = "恭喜你，终于找回了职业爱豆的冷静。距离产生美，下台了再打一架吧。";
-            color = "#3b82f6"; // 蓝色
+            comment = "恭喜你，终于找回了职业爱豆的冷静。距离产生美，这距离可以开一家蜜雪冰城了。";
+            color = "#3b82f6"; 
+        } else if (finalDist > 3) {
+            rank = 'F';
+            comment = "别挣扎了 你离不开他";
+            color = "#10b981"; 
         } else {
             rank = 'F';
             comment = "说实话，你就是想贴着利特吧";
-            color = "#10b981"; // 绿色
+            color = "#10b981"; 
         }
         
         const rankEl = document.getElementById('result-rank');
@@ -290,6 +294,11 @@
 
     function handleAction(e) {
         if (gameState === 'PLAYING') {
+            // 如果是触摸事件，限制同时生效的手指数量（最多支持双指，防止多指作弊）
+            if (e.touches && e.touches.length > 2) {
+                return; 
+            }
+            
             if (e.cancelable) e.preventDefault();
             velocity += CLICK_IMPULSE;
         }
